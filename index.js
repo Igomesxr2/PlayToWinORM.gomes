@@ -131,6 +131,68 @@ app.post("/usuarios/:id/novoCartao", async (req, res) => {
   res.redirect(`/usuarios/${id}/cartoes`);
 });
 
+//Jogos
+const { where } = require("sequelize");
+
+app.get("/jogos", async (req, res) => {
+  const jogos = await Jogo.findAll({ raw: true });
+
+  res.render("jogos", { jogos });
+});
+
+app.get("/jogos/novo", (req, res) => {
+  res.render("formJogo");
+});
+
+app.post("/jogos/novo", async (req, res) => {
+  const dadosJogos = {
+    titulo: req.body.titulo,
+    descricao: req.body.descricao,
+    precoBase: req.body.precoBase,
+  };
+
+  const jogo = await Jogo.create(dadosJogos);
+  res.send("Jogo inserido sobre o id " + jogo.id);
+});
+
+app.get("/jogos/:id/update", async (req, res) => {
+  const id = parseInt(req.params.id);
+  const jogo = await Jogo.findByPk(id, { raw: true });
+
+  res.render("formJogo", { jogo });
+});
+
+app.post("/jogo/:id/update", async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  const dadosJogo = {
+    titulo: req.body.titulo,
+    descricao: req.body.descricao,
+    precoBase: req.body.precoBase,
+  };
+
+  const retorno = await Jogo.update(dadosJogo, { where: { id: id } });
+
+  if (retorno > 0) {
+    res.redirect("/jogos");
+  } else {
+    res.send("Erro ao atualizar o jogo");
+  }
+});
+
+app.post("/jogos/:id/delete", async (req, res) => {
+  const id = parseInt(req.params.id);
+
+  const retorno = await Jogo.destroy({ where: { id: id } });
+
+  if (retorno > 0) {
+    res.redirect("/jogos");
+  } else {
+    res.send("Erro ao excluir jogo");
+  }
+});
+
+
 app.listen(8000, () => {
   console.log("Server rodando!");
 });
